@@ -3,9 +3,10 @@
 import xml.dom.minidom
 
 dataDir = '../'
-topic = 'full_database.xml'
+#topic = 'full_database'
+topic = 'mini'
 
-dataDir = dataDir + topic
+file = dataDir + topic + '.xml'
 
 
 
@@ -17,7 +18,7 @@ def getText(nodelist):
 	return ''.join(rc)
 
 result = ""
-datab = xml.dom.minidom.parse(dataDir)
+datab = xml.dom.minidom.parse(file)
 drugList = datab.getElementsByTagName('drug')
 
 
@@ -27,12 +28,15 @@ for i in range(drugList):
 	idList_unfiltered = drugList[i].getElementsByTagName('drugbank-id')
 	idList= []
 	for i in range(idList_unfiltered) :
-		if idList_unfiltered[i].getAttribute('primary') = 'true' :
+		if idList_unfiltered[i].getAttribute('primary') == 'true' :
 			idList.append.idList_unfiltered[i]
 	atcCode = drugList[i].getElementsByTagName('atc-code').getAttribute('code')
-	drugInteractions = drugList[i].getElementsByTagName('
+	drugInteractions_tofilter = drugList[i].getElementsByTagName('drug-interactions')
+	drugInteractions = drugInteractions_tofilter.getElementsByTagName('drugbank-id')
 	
-
+print(name)
+print(idList)
+print(atcCode)
 	
 
 def getCitationList(pmid):
