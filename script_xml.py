@@ -21,34 +21,20 @@ result = ""
 datab = xml.dom.minidom.parse(file)
 drugList = datab.getElementsByTagName('drug')
 
+for drug in drugList:
+	if 'type' in drug.attributes :
+		name = getText(drug.getElementsByTagName('name')[0].childNodes)
+		print(name)
+		id= getText(drug.getElementsByTagName('drugbank-id')[0].childNodes)
+		print(id)
+		atcCode=drug.getElementsByTagName('atc-code')[0].getAttribute('code')
+		print(atcCode)
+		
+		drugInteractionsList = drug.getElementsByTagName('drug-interactions')
+		for drug in drugInteractionsList :
+				drug_2 = drug.getElementsByTagName('drug-interaction')
+				test = getText(drug_2.getElementsByTagName('drugbank-id'))
+				print(text)
+			
+		
 
-
-for i in range(drugList):
-	name = drugList[i].getElementsByTagName('name')
-	idList_unfiltered = drugList[i].getElementsByTagName('drugbank-id')
-	idList= []
-	for i in range(idList_unfiltered) :
-		if idList_unfiltered[i].getAttribute('primary') == 'true' :
-			idList.append.idList_unfiltered[i]
-	atcCode = drugList[i].getElementsByTagName('atc-code').getAttribute('code')
-	drugInteractions_tofilter = drugList[i].getElementsByTagName('drug-interactions')
-	drugInteractions = drugInteractions_tofilter.getElementsByTagName('drugbank-id')
-	
-print(name)
-print(idList)
-print(atcCode)
-	
-
-def getCitationList(pmid):
-	citations = []
-	domArticle = xml.dom.minidom.parse(dataDir + pmid + ".xml")
-	citationElts = domArticle.getElementsByTagName('CommentsCorrections')
-	for currentCitation in citationElts:
-		if currentCitation.getAttribute('RefType') != "Cites":
-			continue
-		for currentCitationRef in currentCitation.getElementsByTagName('PMID'):
-			print(getText(currentCitationRef.childNodes))
-			citations.append(getText(currentCitationRef.childNodes))
-	return citations
-
-#getCitationList('23110428')
