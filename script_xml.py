@@ -17,11 +17,10 @@ def getText(nodelist):
 			rc.append(node.data)
 	return ''.join(rc)
 
-result = ""
-datab = xml.dom.minidom.parse(file)
-drugList = datab.getElementsByTagName('drug')
 
-for drug in drugList:
+datab = xml.dom.minidom.parse(file)
+
+for drug in datab.getElementsByTagName('drug'):
 	if 'type' in drug.attributes :
 		name = getText(drug.getElementsByTagName('name')[0].childNodes)
 		print(name)
@@ -29,12 +28,19 @@ for drug in drugList:
 		print(id)
 		atcCode=drug.getElementsByTagName('atc-code')[0].getAttribute('code')
 		print(atcCode)
+		listInterID = []
+		listInterDesc = []
+		for drugInter in drug.getElementsByTagName('drug-interactions') :
+				for inter in drugInter.getElementsByTagName('drug-interaction') :
+					listInterID.append(getText(inter.getElementsByTagName('drugbank-id')[0].childNodes))
+					listInterDesc.append(getText(inter.getElementsByTagName('description')[0].childNodes))
+		externalList = {}
+		for exter_ref in drug.getElementsByTagName('external-identifiers') :
+			for exter_ref2 in exter_ref.getElementsByTagName('external-identifier') :
+				externalList[getText(exter_ref2.getElementsByTagName('resource')[0].childNodes)] = getText(exter_ref2.getElementsByTagName('identifier')[0].childNodes)
+		print(externalList)
+					
 		
-		drugInteractionsList = drug.getElementsByTagName('drug-interactions')
-		for drug in drugInteractionsList :
-				drug_2 = drug.getElementsByTagName('drug-interaction')
-				test = getText(drug_2.getElementsByTagName('drugbank-id'))
-				print(text)
-			
+		
 		
 
