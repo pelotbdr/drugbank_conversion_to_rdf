@@ -18,8 +18,8 @@ def getText(nodelist):
 	return ''.join(rc)
 
 prefix = """
-@prefix : <http://www.semanticweb.org/user/ontologies/2018/1#> .
-@prefix drugbank: !!! A TROUVER !!!.
+@prefix : <https://www.irisa.fr/> .
+@prefix drugbank: https://www.irisa.fr.
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
@@ -36,53 +36,49 @@ datab = xml.dom.minidom.parse(file)
 for drug in datab.getElementsByTagName('drug'):
 	if 'type' in drug.attributes :
 		name = getText(drug.getElementsByTagName('name')[0].childNodes)			# Drug Name
-		output = open(name + '.ttl', 'w')
+		output = open('./output/' + name + '.ttl', 'w')
 		output.write(prefix + '\n')
 		output.write('drugbank:'+ name + ' a ' + 'drugbank:drug ;' + '\n')
 		
 		
-		#output.write('\t' + 'drugbank:idIs ' + getText(drug.getElementsByTagName('drugbank-id')[0].childNodes) + ' ;' + '\n')
-		id= getText(drug.getElementsByTagName('drugbank-id')[0].childNodes)		# Drug Drugbank ID
-		output.write('\t' + 'drugbank:idIs ' + id + ' ;' + '\n')
+		output.write('\t' + 'drugbank:idIs "' + getText(drug.getElementsByTagName('drugbank-id')[0].childNodes) + '"^^xsd:string ;' + '\n')			# Drug DrugBank ID
 		
-		#output.write('\t' + 'drugbank:atcIs ' + drug.getElementsByTagName('atc-code')[0].getAttribute('code') + ' ;' + '\n')
-		atcCode=drug.getElementsByTagName('atc-code')[0].getAttribute('code')	# Drug ATC Code
-		output.write('\t' + 'drugbank:atcIs ' + atcCode + ' ;' + '\n') 
+		output.write('\t' + 'drugbank:atcIs "' + drug.getElementsByTagName('atc-code')[0].getAttribute('code') + '"^^xsd:string ;' + '\n') 		# ATC code of the Drug
 		
-		listInterID = []
-		listInterDesc = []
+		#listInterDesc = []
 		for drugInter in drug.getElementsByTagName('drug-interactions') :
 				for drugInter2 in drugInter.getElementsByTagName('drug-interaction') :
-					#output.write('\t' + 'drugbank:interactsWith ' + getText(drugInter2.getElementsByTagName('drugbank-id')[0].childNodes) + ' ;' + '\n')
-					listInterID.append(getText(drugInter2.getElementsByTagName('drugbank-id')[0].childNodes))						# ID of Drugs interacting with our starting Drug
-					listInterDesc.append(getText(drugInter2.getElementsByTagName('description')[0].childNodes))						# Description of the interactions
-		for i in range(len(listInterID)) :
-			output.write('\t' + 'drugbank:interactsWith ' + listInterID[i] + ' ;' + '\n')
+					output.write('\t' + 'drugbank:interactsWith "' + getText(drugInter2.getElementsByTagName('drugbank-id')[0].childNodes) + '"^^xsd:string ;' + '\n')		# ID of Drugs interacting with our starting Drug
+					#listInterDesc.append(getText(drugInter2.getElementsByTagName('description')[0].childNodes))						# Description of the interactions		
+		
+		
 		externalList = {}
 		for exter_ref in drug.getElementsByTagName('external-identifiers') :
 			for exter_ref2 in exter_ref.getElementsByTagName('external-identifier') :
-				externalList[getText(exter_ref2.getElementsByTagName('resource')[0].childNodes)] = getText(exter_ref2.getElementsByTagName('identifier')[0].childNodes)		# External IDs of the starting Drug
-		enzymes = []
+				output.write('\t' + 'drugbank:hasExternalId "' + getText(exter_ref2.getElementsByTagName('resource')[0].childNodes) + ':' + getText(exter_ref2.getElementsByTagName('identifier')[0].childNodes) + '"^^xsd:string ;' + '\n')		# External IDs of the starting Drug
+		
+		
 		for pathway in drug.getElementsByTagName('pathways') :
 			for pathway2 in pathway.getElementsByTagName('pathway') :
 				for enz in pathway2.getElementsByTagName('enzymes') :
 					for i in range(len(enz.getElementsByTagName('uniprot-id'))) :
-						enzymes.append(getText(enz.getElementsByTagName('uniprot-id')[i].childNodes))					# Enzymes implicated in the pathway of the starting Drug
+						output.write('\t' + 'drugbank:interactsWithEnzyme "' + getText(enz.getElementsByTagName('uniprot-id')[i].childNodes) + '"^^xsd:string ;' + '\n')			# Enzymes implicated in the pathway of the starting Drug
+
 		drugTarget = {}
 		externalListTarget = {}
 		goClassif = {}
 		for target in drug.getElementsByTagName('targets') :
 			for target2 in drug.getElementsByTagName('target') :
-				drugTarget[getText(target2.getElementsByTagName('id')[0].childNodes)] = getText(target2.getElementsByTagName('actions')[0].getElementsByTagName('action')[0].childNodes)  # Drug Target
+				output.write('\t' + 'drugbank:drugTargetIs "' + getText(target2.getElementsByTagName('id')[0].childNodes) + ':' + getText(target2.getElementsByTagName('actions')[0].getElementsByTagName('action')[0].childNodes) + '"^^xsd:string ;' + '\n') # Drug Target + action
+
 				for polypep in target2.getElementsByTagName('polypeptide') :
 					for exter_ref_target in polypep.getElementsByTagName('external-identifiers') :
 						for exter_ref_target2 in exter_ref_target.getElementsByTagName('external-identifier') :
-							externalListTarget[getText(exter_ref_target2.getElementsByTagName('resource')[0].childNodes)] = getText(exter_ref_target2.getElementsByTagName('identifier')[0].childNodes) # External IDs of the target
+							output.write('\t' + 'drugbank:targetExternalID "' + getText(exter_ref_target2.getElementsByTagName('resource')[0].childNodes) + ':' + getText(exter_ref_target2.getElementsByTagName('identifier')[0].childNodes) + '"^^xsd:string ;' + '\n') # External IDs of the target(s) 
+					
 					for go in polypep.getElementsByTagName('go-classifiers') :
 						for go2 in go.getElementsByTagName('go-classifier') :
-							if getText(go2.getElementsByTagName('category')[0].childNodes) in goClassif :																		# GO classifiers of the target
-								goClassif[getText(go2.getElementsByTagName('category')[0].childNodes)] += "," + getText(go2.getElementsByTagName('description')[0].childNodes)
-							else :
-								goClassif[getText(go2.getElementsByTagName('category')[0].childNodes)] = getText(go2.getElementsByTagName('description')[0].childNodes)
+							output.write('\t' + 'drugbank:go_' + getText(go2.getElementsByTagName('category')[0].childNodes) + ' "' + getText(go2.getElementsByTagName('description')[0].childNodes) + '"^^xsd:string ;' + '\n')		#GO Classifiers of the  target
+
 		
 		output.close()
