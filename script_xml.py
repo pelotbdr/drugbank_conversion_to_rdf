@@ -4,8 +4,8 @@ import xml.dom.minidom
 
 dataDir = '../'
 #topic = 'full_database'
-#topic = 'mini'
-topic = 'mini2'
+topic = 'mini'
+#topic = 'mini2'
 
 file = dataDir + topic + '.xml'
 
@@ -42,9 +42,16 @@ for drug in datab.getElementsByTagName('drug'):
 		
 		output.write('\t' + ' drugbank:nameIs "' + name + '"^^xsd:string ;' + '\n')
  		
+		output.write('\t' + ' drugbank:casnumberIs "' + getText(drug.getElementsByTagName('cas-number') + '"^^xsd:string ;' + '\n')  			# CAS number of the Drug
+		
 		output.write('\t' + ' drugbank:idIs "' + getText(drug.getElementsByTagName('drugbank-id')[0].childNodes) + '"^^xsd:string ;' + '\n')			# Drug DrugBank ID
 		
 		output.write('\t' +  ' drugbank:atcIs "' + drug.getElementsByTagName('atc-code')[0].getAttribute('code') + '"^^xsd:string ;' + '\n') 		# ATC code of the Drug
+		
+		for drugReference in drug.getElementsByTagName('general-references') :
+			for drugReference2 in drugReference.getElementsByTagName('articles') :
+				for drugReference3 in drugReference2.getElementsByTagName('article') :
+					output.write('\t' + ' drugbank:pubmedRef "' + getText(drugReference3.getElementsByTagName('pubmed-id')[0].childNodes) + '"^^xsd:string ;' + '\n') # PubMed Articles referencing the Drug
 		
 		#listInterDesc = []
 		for drugInter in drug.getElementsByTagName('drug-interactions') :
