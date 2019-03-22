@@ -2,9 +2,10 @@
 
 import xml.dom.minidom
 
-dataDir = '../'
-#topic = 'full_database'
-topic = 'mini'
+#dataDir = '../'
+dataDir = './'
+topic = 'full_database'
+#topic = 'mini'
 #topic = 'mini2'
 
 file = dataDir + topic + '.xml'
@@ -30,24 +31,26 @@ prefix = """@prefix : <https://www.irisa.fr/test#> .
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
 @prefix faldo: <http://biohackathon.org/resource/faldo#> .  
 """
+print("1")
+#voir sax et expat et xmlr
 
-datab = xml.dom.minidom.parse(file)
 
-for drug in datab.getElementsByTagName('drug'):
+for drug in xml.dom.minidom.parse(file).getElementsByTagName('drug'):
+	print("2")
 	if 'type' in drug.attributes :
 		name = getText(drug.getElementsByTagName('name')[0].childNodes)			# Drug Name
 		output = open('./output/' + name + '.ttl', 'w')
 		output.write(prefix + '\n')
 		output.write('drugbank:' + name + ' a ' + 'drugbank:drug ;' + '\n')
-		
+		print("3")
 		output.write('\t' + ' drugbank:nameIs "' + name + '"^^xsd:string ;' + '\n')
  		
-		output.write('\t' + ' drugbank:casnumberIs "' + getText(drug.getElementsByTagName('cas-number') + '"^^xsd:string ;' + '\n')  			# CAS number of the Drug
+		output.write('\t' + ' drugbank:casnumberIs "' + getText(drug.getElementsByTagName('cas-number')) + '"^^xsd:string ;' + '\n')  			# CAS number of the Drug
 		
 		output.write('\t' + ' drugbank:idIs "' + getText(drug.getElementsByTagName('drugbank-id')[0].childNodes) + '"^^xsd:string ;' + '\n')			# Drug DrugBank ID
 		
 		output.write('\t' +  ' drugbank:atcIs "' + drug.getElementsByTagName('atc-code')[0].getAttribute('code') + '"^^xsd:string ;' + '\n') 		# ATC code of the Drug
-		
+		print("4")
 		for drugReference in drug.getElementsByTagName('general-references') :
 			for drugReference2 in drugReference.getElementsByTagName('articles') :
 				for drugReference3 in drugReference2.getElementsByTagName('article') :
@@ -80,11 +83,11 @@ for drug in datab.getElementsByTagName('drug'):
 				for polypep in target2.getElementsByTagName('polypeptide') :
 					for exter_ref_target in polypep.getElementsByTagName('external-identifiers') :
 						for exter_ref_target2 in exter_ref_target.getElementsByTagName('external-identifier') :
-							output.write('\t' + ' drugbank:targetExternalID "' + getText(exter_ref_target2.getElementsByTagName('resource')[0].childNodes) + ':' + getText(exter_ref_target2.getElementsByTagName('identifier')[0].childNodes) + '"^^xsd:string ;' + '\n') # External IDs of the target(s) 
-					
+							output.write('\t' + ' drugbank:targetExternalID "' + getText(exter_ref_target2.getElementsByTagName('resource')[0].childNodes) + ':' + getText(exter_ref_target2.getElementsByTagName('identifier')[0].childNodes) + '"^^xsd:string ;' + '\n') # External IDs of the target(s) 	
 					for go in polypep.getElementsByTagName('go-classifiers') :
 						for go2 in go.getElementsByTagName('go-classifier') :
 							output.write('\t' + ' drugbank:go_' + getText(go2.getElementsByTagName('category')[0].childNodes) + ' "' + getText(go2.getElementsByTagName('description')[0].childNodes) + '"^^xsd:string ;' + '\n')		#GO Classifiers of the  target
+		print("5")
 		output.write('\t' + ' drugbank:isComplete "TRUE"^^xsd:string .' + '\n')
 		print("Progressing ...")
 		output.close()
